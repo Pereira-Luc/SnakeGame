@@ -201,9 +201,14 @@ public class Main extends Application {
 
     }
 
-    //game loop
+    /**
+     * game loop
+     * @param snake
+     * @param food
+     * @return true if the game is still running
+     */
     private static boolean gameLoop(Snake snake, Food food) {
-        //check if the snake is dead
+        //check if the snake is still alive
         if (snake.isDead(amountOfXYBoxes, amountOfXYBoxes)) {
             //if the snake is dead, show the game over label
             return false;
@@ -224,7 +229,7 @@ public class Main extends Application {
     }
 
 
-    //method to create the playingField (matrix)
+    /**method to create the playingField (matrix)**/
     public static int[][] createPlayingField(int width, int height) {
         int[][] playingField = new int[width][height];
         for (int i = 0; i < width; i++) {
@@ -235,7 +240,7 @@ public class Main extends Application {
         return playingField;
     }
 
-    //draw the playingField in the pane as a matrix the sing point are blockSize by blockSize pixels
+    /**draw the playingField in the pane as a matrix the sing point are blockSize by blockSize pixels**/
     public static void drawPlayingField(GridPane root, Snake snake, Food food) {
         //clear the pane
         root.getChildren().clear();
@@ -272,7 +277,7 @@ public class Main extends Application {
         return gameScene;
     }
 
-    //this function switches the scene to the options scene
+    /**this function switches the scene to the options scene**/
     public static void changeScene(Scene scene, Stage primaryStage) {
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -281,17 +286,18 @@ public class Main extends Application {
 
     //------------------------------Different Scenes---------------------------------
 
-
-    //this function creates the options' scene
-    //the options' scene has the following buttons:
-    // - Snake speed (slider) - This changes the sleep interval lover means faster
-    // - Snake size (slider) - This changes the snake size
-    // - Point multiplier (slider) - This changes the point multiplier
-    // - Amount of food (slider) - This changes the amount of food
-    // - Snake Grow (slider) - This changes the amount of points the snake grows
-    // - Snake Color (button) - This changes the snake color
-    // - Food Color (button) - This changes the food color
-    // - Save - Saves Everything to an XML file
+    /**this function creates the game over scene
+    * this function creates the options' scene
+    * the options' scene has the following buttons:
+    * - Snake speed (slider) - This changes the sleep interval lover means faster
+    * - Snake size (slider) - This changes the snake size
+    * - Point multiplier (slider) - This changes the point multiplier
+    * - Amount of food (slider) - This changes the amount of food
+    * - Snake Grow (slider) - This changes the amount of points the snake grows
+    * - Snake Color (button) - This changes the snake color
+    * - Food Color (button) - This changes the food color
+    * - Save - Saves Everything to an XML file
+     **/
 
 
     public static Scene optionsScene(Stage primaryStage) {
@@ -570,7 +576,7 @@ public class Main extends Application {
     }
 
 
-    //game Over scene w label with the score and restart button
+    /**game Over scene w label with the score and restart button**/
     public static Scene gameOverScene(Stage primaryStage) {
         //create the scene
         Scene gameOverScene = new Scene(new Group(), primaryStage.getMaxWidth(), primaryStage.getMaxHeight());
@@ -629,14 +635,16 @@ public class Main extends Application {
         return gameOverScene;
     }
 
-    //generate an xml file with all the current configurations
-    //Snake speed (slider) - This changes the sleep interval lover means faster
-    // - Snake size (slider) - This changes the snake size
-    // - Point multiplier (slider) - This changes the point multiplier
-    // - Amount of food (slider) - This changes the amount of food
-    // - Snake Grow (slider) - This changes the amount of points the snake grows
-    // - Snake Color (button) - This changes the snake color
-    // - Food Color (button) - This changes the food color
+    /** Generate an xml file with all the current configurations<br>
+    * Snake speed (slider) - This changes the sleep interval lover means faster
+    * - Snake size (slider) - This changes the snake size
+    * - Point multiplier (slider) - This changes the point multiplier
+    * - Amount of food (slider) - This changes the amount of food
+    * - Snake Grow (slider) - This changes the amount of points the snake grows
+    * - Snake Color (button) - This changes the snake color
+    * - Food Color (button) - This changes the food color
+
+     **/
 
     public static void saveOptions(Stage s) {
         //check if playingField is null
@@ -723,6 +731,11 @@ public class Main extends Application {
             e.printStackTrace();
         }
     }
+
+    /** Load the options from the xml file
+     * @param path
+     * @throws ParserConfigurationException
+     */
 
     public static void loadOptions(String path) throws ParserConfigurationException {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
