@@ -22,7 +22,7 @@ a map editor and some pre-defined maps.
 The map is inside of map tag. All the cells have a default value of 0. [ value="0" ] 
 If the value is 1, the cell is a wall.
 
-<pre>
+
  <table>
     <tr>
      <td>
@@ -59,7 +59,7 @@ If the value is 1, the cell is a wall.
      </td>
     </tr>
 </table>
-</pre>
+
 
 
 
@@ -68,7 +68,7 @@ If the value is 1, the cell is a wall.
 
 <h4>In (brackets) is the tag for the setting</h4>
 
-<pre>
+
 <table>
 <tr>
 <td>
@@ -136,7 +136,6 @@ The color of the food. ( Can only be changed in the xml file )
 </tr>
 </table>
 
-</pre>
 #
 
 <h2> Compile </h2>
