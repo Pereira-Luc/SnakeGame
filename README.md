@@ -8,7 +8,7 @@ a map editor and some pre-defined maps.
 
 * The Jar file can be run without any additional libraries.
 
-##Release Links
+<h3>Release Links</h3>
 
     * [Download v1.0.0]( https://github.com/Pereira-Luc/SnakeGame/releases/tag/v1.0.0 )
 
