@@ -148,7 +148,7 @@ The color of the food. ( Can only be changed in the xml file )
 * Or it can also be run from:
 * `View >>> Tool Windows >>> Maven >>> clean & package`
  
-
+#
 <h3>Release Links</h3>
 
 [Download Snake v1.0.0]( https://github.com/Pereira-Luc/SnakeGame/releases/tag/v1.0.0 )
