@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 
@@ -12,9 +13,11 @@ public class Snake extends Node {
     private int direction;
     private int nextDirection;
     private int length;
+    private Color snakeColor = Color.GREEN;
     private final int growStep;
     //arraylist of points of snake
     ArrayList<Point> snakeLocation;
+
 
 
     //get Snake head point
@@ -22,12 +25,13 @@ public class Snake extends Node {
         return snakeLocation.get(0);
     }
 
-    public Snake(int x, int y, int direction, int length, int growStep) {
+    public Snake(int x, int y, int direction, int length, int growStep, Color c) {
         snakeLocation = new ArrayList<>();
         this.direction = direction;
         snakeLocation.add(new Point(x, y));
         this.length = length;
         this.growStep = growStep;
+        this.snakeColor = c;
     }
 
     //this function checks a point of coordinates is a part of snake
@@ -109,8 +113,10 @@ public class Snake extends Node {
     }
 
     public Background getBackgroundColor() {
-        return new Background(new BackgroundFill(javafx.scene.paint.Color.GREEN, null, null));
+        return new Background(new BackgroundFill(snakeColor, null, null));
     }
+
+
 
     @Override
     public Node getStyleableNode() {

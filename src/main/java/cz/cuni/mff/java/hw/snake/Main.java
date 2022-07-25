@@ -10,8 +10,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.*;
@@ -19,6 +19,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.w3c.dom.Document;
@@ -42,24 +43,25 @@ import org.xml.sax.SAXException;
 //Snake Game using JavaFX
 public class Main extends Application {
 
-    private static final int WIDTH = 1000;
-    private static final int HEIGHT = 1000;
+    private static final int WIDTH = 1200;
+    private static final int HEIGHT = 1200;
     private static int SNAKE_SIZE = 1;
     private static int SNAKE_SPEED = 150;
     private static final int SNAKE_DIRECTION = 0;
     private static int SNAKE_GROW = 1;
 
-    private static Color SNAKE_COLOR = Color.GREEN;
+    private static Color SNAKE_COLOR = Color.BLUE;
     private static Color FOOD_COLOR = Color.RED;
-    
 
+    private static int amountOfFood = 3;
 
-    private static int amountOfFood = 0;
+    private static final int amountOfXYBoxes = 30;
+    private static final int blockSize = WIDTH / amountOfXYBoxes;
 
-    private static final int amountOfXYBoxes = 20;
-    private static final int blockSize = WIDTH/amountOfXYBoxes;
+    private static final int buildBlockSize = WIDTH / 10;
+
     private static int pointMultiplier = 100;
-    private static final Background defaultBackground =  new Background(new BackgroundFill(javafx.scene.paint.Color.BLACK, null, null));
+    private static final Background defaultBackground = new Background(new BackgroundFill(javafx.scene.paint.Color.BLACK, null, null));
 
     //direction
     private static final int UP = 0;
@@ -71,31 +73,12 @@ public class Main extends Application {
 
     static int[][] playingField;
 
-
-    //////////////////////////////////////////////////////////////////////////////
-                                    //BUGS//
-    // 1. Food can spawn in the wall FIXED
-    // 2. Snake can spawn in the wall FIXED
-    // 3. It is not possible to chang the snake color nor the food color
-
-    //////////////////////////////////////////////////////////////////////////////
-
-    //////////////////////////////////////////////////////////////////////////////
-                                    //Want to do//
-    // 1. Make the game resizable
-    // 2. Make it possible to change menu color
-    // 3. Clean the code a little ALOTTTT
-
-    //////////////////////////////////////////////////////////////////////////////
-
-
-
     @Override
-    public void start(Stage stage) throws  ParserConfigurationException {
+    public void start(Stage stage) throws ParserConfigurationException {
 
 
         //load the values from the xml file
-        loadOptions();
+        loadOptions("options.xml");
         score = 0;
 
         stage.setWidth(WIDTH);
@@ -119,7 +102,7 @@ public class Main extends Application {
         return (int) (Math.random() * Main.amountOfXYBoxes);
     }
 
-    //this methode returns a ranim pooint on the playing field that is not a wall
+    //this methode returns a random point on the playing field that is not a wall
     private static Point getRandomPoint() {
         int x = getRandomNumber();
         int y = getRandomNumber();
@@ -130,30 +113,55 @@ public class Main extends Application {
         return new Point(x, y);
     }
 
-    private static void startTheGame(Scene scene, GridPane gridPanel, Stage primaryStage) {
+    //count amount of food on the playing field
+    private static int countFood(Food food) {
+        int count = 0;
+        for (int i = 0; i < Main.amountOfXYBoxes; i++) {
+            for (int j = 0; j < Main.amountOfXYBoxes; j++) {
+                if (food.isFood(new Point(i, j))) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
 
+    //this method get n amount of random numbers
+    private static Point[] getRandomPoints(Integer n){
+        Point[] points = new Point[n];
+        for (int i = 0; i < n; i++) {
+            points[i] = getRandomPoint();
+        }
+        //print Point array
+        for (Point point : points) {
+            System.out.println(point.getX() + " " + point.getY());
+        }
+
+        return points;
+    }
+
+    private static void startTheGame(GridPane gridPanel, Stage primaryStage) {
+
+        score = 0;
 
         Point snakePoint = getRandomPoint();
         //create the snake
-        Snake snake = new Snake(snakePoint.getX(), snakePoint.getY(), SNAKE_DIRECTION, SNAKE_SIZE, SNAKE_GROW);
+        Snake snake = new Snake(snakePoint.getX(), snakePoint.getY(), SNAKE_DIRECTION, SNAKE_SIZE, SNAKE_GROW, SNAKE_COLOR);
 
-        Point foodPoint = getRandomPoint();
+        Point[] foodPoints = getRandomPoints(amountOfFood);
         //create the food
-        Food food = new Food(foodPoint.getX(),foodPoint.getY());
+        Food food = new Food(FOOD_COLOR);
+
+        food.createNewFood(foodPoints);
 
 
         drawPlayingField(gridPanel, snake, food);
 
 
-
-
-
-        startGameLoop(snake, food, gridPanel, playingField, primaryStage);
-
-
+        startGameLoop(snake, food, gridPanel, primaryStage);
     }
 
-    private static void startGameLoop(Snake snake, Food food, GridPane gridPanel, int[][] playingField, Stage primaryStage) {
+    private static void startGameLoop(Snake snake, Food food, GridPane gridPanel, Stage primaryStage) {
         //start the game loop
         new Thread((new Runnable() {
             @Override
@@ -173,7 +181,7 @@ public class Main extends Application {
                 while (gameLoop(snake, food)) {
                     try {
                         Thread.sleep(SNAKE_SPEED);
-                    }catch (InterruptedException e){
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     Platform.runLater(() -> {
@@ -192,23 +200,24 @@ public class Main extends Application {
 
     //game loop
     private static boolean gameLoop(Snake snake, Food food) {
-            //check if the snake is dead
-            if (snake.isDead(amountOfXYBoxes,amountOfXYBoxes)) {
-                //if the snake is dead, show the game over label
-                return false;
-            } else {
-                //if the snake is not dead, check if the snake ate the food
-                Point isSnakeEatingFood = snake.isEating(food);
-                if (isSnakeEatingFood != null) {
-                    //if the snake ate the food, create a new food
-                    food.eaten(isSnakeEatingFood.getX(), isSnakeEatingFood.getY());
-                    food.createNewFood(getRandomPoint());
-                    snake.grow();
-                    score = score + SNAKE_GROW * pointMultiplier;
-                }
+        //check if the snake is dead
+        if (snake.isDead(amountOfXYBoxes, amountOfXYBoxes)) {
+            //if the snake is dead, show the game over label
+            return false;
+        } else {
+            //if the snake is not dead, check if the snake ate the food
+            Point isSnakeEatingFood = snake.isEating(food);
+            if (isSnakeEatingFood != null) {
+                //if the snake ate the food, create a new food
+                food.eaten(isSnakeEatingFood.getX(), isSnakeEatingFood.getY());
+                Integer missingFood = amountOfFood - countFood(food);
+                food.createNewFood(getRandomPoints(missingFood));
+                snake.grow();
+                score = score + SNAKE_GROW * pointMultiplier;
             }
-            snake.move();
-            return true;
+        }
+        snake.move();
+        return true;
     }
 
 
@@ -232,18 +241,18 @@ public class Main extends Application {
             for (int j = 0; j < playingField[i].length; j++) {
                 Pane pane = new Pane();
                 pane.setPrefSize(blockSize, blockSize);
-                if(snake.isSnake(i,j)){
+                if (snake.isSnake(i, j)) {
                     //set the color of the snake
                     pane.setBackground(snake.getBackgroundColor());
-                }else if(food.isFood(new Point(i,j))){
+                } else if (food.isFood(new Point(i, j))) {
                     //set the color of the food
                     pane.setBackground(food.getBackgroundColor());
-                }else if(playingField[i][j] == 1){
+                } else if (playingField[i][j] == 1) {
                     pane.setBackground(defaultBackground);
                     pane.setStyle("-fx-border-color: #2661f8");
-                }else{
+                } else {
                     pane.setBackground(defaultBackground);
-                    pane.setStyle("-fx-border-color: #2c2c2c");
+                    pane.setStyle("-fx-border-color: #1c1c1c");
                 }
                 //set border color to white
                 root.add(pane, i, j);
@@ -254,7 +263,8 @@ public class Main extends Application {
     public static Scene gameScene(Stage primaryStage) {
         GridPane gridPanel = new GridPane();
         Scene gameScene = new Scene(gridPanel, primaryStage.getMinWidth(), primaryStage.getMinHeight());
-        startTheGame(gameScene, gridPanel, primaryStage);
+        startTheGame(gridPanel, primaryStage);
+
 
         return gameScene;
     }
@@ -266,12 +276,11 @@ public class Main extends Application {
     }
 
 
-
     //------------------------------Different Scenes---------------------------------
 
 
-    //this function creates the options scene
-    //the options' scene has the foolowing buttons:
+    //this function creates the options' scene
+    //the options' scene has the following buttons:
     // - Snake speed (slider) - This changes the sleep interval lover means faster
     // - Snake size (slider) - This changes the snake size
     // - Point multiplier (slider) - This changes the point multiplier
@@ -287,8 +296,6 @@ public class Main extends Application {
         GridPane gridPanel = new GridPane();
 
         //create the buttons
-        Button snakeColorButton = new Button("Snake Color");
-        Button foodColorButton = new Button("Food Color");
         Button saveButton = new Button("Save");
         Button backButton = new Button("Back");
 
@@ -314,11 +321,11 @@ public class Main extends Application {
         snakeGrowLabel.setStyle("-fx-font-size: 20");
 
 
-        snakeColorButton.setTextFill(Color.WHITE);
+        /*snakeColorButton.setTextFill(Color.WHITE);
         snakeColorButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
 
         foodColorButton.setTextFill(Color.WHITE);
-        foodColorButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        foodColorButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));*/
 
         saveButton.setTextFill(Color.WHITE);
         saveButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
@@ -327,8 +334,6 @@ public class Main extends Application {
         backButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
 
         //change the color of the buttons
-        snakeColorButton.setStyle("-fx-background-color: SNACK_COLOR");
-        foodColorButton.setStyle("-fx-background-color: FOOD_COLOR");
         saveButton.setStyle("-fx-background-color: Green");
         backButton.setStyle("-fx-background-color: Green");
 
@@ -354,13 +359,11 @@ public class Main extends Application {
         gridPanel.add(snakeGrowSlider, 1, 4);
 
         //add the buttons
-        gridPanel.add(snakeColorButton, 0, 5);
-        gridPanel.add(foodColorButton, 1, 5);
         gridPanel.add(saveButton, 0, 6);
         gridPanel.add(backButton, 1, 6);
 
         //set the scene
-        Scene optionsScene = new Scene(gridPanel,primaryStage.getMinWidth(), primaryStage.getMinHeight());
+        Scene optionsScene = new Scene(gridPanel, primaryStage.getMinWidth(), primaryStage.getMinHeight());
 
         //set the background color
         optionsScene.setFill(Color.BLACK);
@@ -373,12 +376,6 @@ public class Main extends Application {
         amountOfFoodLabel.setTextFill(Color.WHITE);
         snakeGrowLabel.setTextFill(Color.WHITE);
 
-
-        //set the action for the snake color button
-        colorPicker(snakeColorButton);
-
-        //set the action for the food color button
-        colorPicker(foodColorButton);
 
         //set the action for the save button
         saveButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -444,23 +441,6 @@ public class Main extends Application {
 
 
         return optionsScene;
-}
-
-    private static void colorPicker(Button snakeColorButton) {
-        snakeColorButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                ColorPicker colorPicker = new ColorPicker();
-                colorPicker.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        //snake.setColor(colorPicker.getValue());
-                        System.out.println(colorPicker.getValue());
-                    }
-                });
-                colorPicker.show();
-            }
-        });
     }
 
 
@@ -472,6 +452,7 @@ public class Main extends Application {
         Button startButton = new Button("Start");
         Button optionsButton = new Button("Options");
         Button mapEditorButton = new Button("Map Editor");
+        Button loadMapButton = new Button("Load Map");
         Button exitButton = new Button("Exit");
 
         Label title = new Label("Snake Game");
@@ -485,67 +466,103 @@ public class Main extends Application {
         //font color
         title.setTextFill(Color.WHITE);
 
-        title.setPrefSize(blockSize * amountOfXYBoxes, blockSize);
+        title.setPrefSize(WIDTH, buildBlockSize);
         //position the title in the center of the screen
         title.setLayoutX(0);
-        title.setLayoutY(blockSize);
+        title.setLayoutY(buildBlockSize);
         //text alignment center
         title.setAlignment(Pos.CENTER);
 
         //set the button size
-        startButton.setPrefSize(blockSize * amountOfXYBoxes, blockSize);
-        optionsButton.setPrefSize(blockSize * amountOfXYBoxes, blockSize);
-        exitButton.setPrefSize(blockSize * amountOfXYBoxes, blockSize);
-        mapEditorButton.setPrefSize(blockSize * amountOfXYBoxes, blockSize);
+        startButton.setPrefSize(WIDTH, buildBlockSize);
+        optionsButton.setPrefSize(WIDTH, buildBlockSize);
+        exitButton.setPrefSize(WIDTH, buildBlockSize);
+        mapEditorButton.setPrefSize(WIDTH, buildBlockSize);
+        loadMapButton.setPrefSize(WIDTH, buildBlockSize);
+
         //set the button background color
         startButton.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         optionsButton.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         exitButton.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         mapEditorButton.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+        loadMapButton.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+
         //set the button text color
         startButton.setTextFill(Color.WHITE);
         optionsButton.setTextFill(Color.WHITE);
         exitButton.setTextFill(Color.WHITE);
         mapEditorButton.setTextFill(Color.WHITE);
+        loadMapButton.setTextFill(Color.WHITE);
+
         //set the button font size
         startButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
         optionsButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
         exitButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
         mapEditorButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        loadMapButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+
         //set the button text
         startButton.setText("Start");
         optionsButton.setText("Options");
         exitButton.setText("Exit");
         mapEditorButton.setText("Map Editor");
+        loadMapButton.setText("Load Map");
 
         //position the buttons in the scene
         startButton.setLayoutX(0);
-        startButton.setLayoutY(blockSize * amountOfXYBoxes / 2 - blockSize * 2);
+        startButton.setLayoutY(WIDTH / 2 - buildBlockSize * 2);
         optionsButton.setLayoutX(0);
-        optionsButton.setLayoutY(blockSize * amountOfXYBoxes / 2 - blockSize + 10);
+        optionsButton.setLayoutY(WIDTH / 2 - buildBlockSize + 10);
         mapEditorButton.setLayoutX(0);
-        mapEditorButton.setLayoutY(blockSize * amountOfXYBoxes / 2 + 20);
+        mapEditorButton.setLayoutY(WIDTH / 2 + 20);
+        loadMapButton.setLayoutX(0);
+        loadMapButton.setLayoutY(WIDTH / 2 + buildBlockSize + 30);
         exitButton.setLayoutX(0);
-        exitButton.setLayoutY(blockSize * amountOfXYBoxes / 2 + blockSize  + 30);
-
-
+        exitButton.setLayoutY(WIDTH / 2 + buildBlockSize * 2 + 40);
 
 
         //set the button onAction
         startButton.setOnAction(e -> {
-            changeScene(gameScene(primaryStage),primaryStage);
+            changeScene(gameScene(primaryStage), primaryStage);
         });
         optionsButton.setOnAction(e -> {
-            changeScene(optionsScene(primaryStage),primaryStage);
+            changeScene(optionsScene(primaryStage), primaryStage);
         });
         mapEditorButton.setOnAction(e -> {
-            changeScene(getMapEditorScene(primaryStage),primaryStage);
+            changeScene(getMapEditorScene(primaryStage), primaryStage);
         });
+
+        loadMapButton.setOnAction(e -> {
+            //open a file chooser
+            FileChooser fileChooser = new FileChooser();
+            //set the title of the file chooser
+            fileChooser.setTitle("Open Map");
+            //set the extension filter
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML files", "*.xml"));
+            //get the path of the file
+            File file = fileChooser.showOpenDialog(primaryStage);
+            //if the file is not null
+            if (file != null) {
+                try {
+                    loadOptions(file.getPath());
+                } catch (ParserConfigurationException ex) {
+                    ex.printStackTrace();
+                }finally {
+                    //success message alert
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Map Loader Information");
+                    alert.setHeaderText("Map Loaded Successfully");
+                    alert.setContentText("You can close this window now");
+                    alert.showAndWait();
+                }
+            }
+        });
+
         exitButton.setOnAction(e -> {
             primaryStage.close();
         });
         //add the buttons to the scene
-        ((Group) scene.getRoot()).getChildren().addAll(title, startButton, optionsButton, mapEditorButton,exitButton);
+        ((Group) scene.getRoot()).getChildren().addAll(title, startButton, optionsButton, mapEditorButton, exitButton, loadMapButton);
         return scene;
     }
 
@@ -563,14 +580,14 @@ public class Main extends Application {
         gameOverLabel.setTextFill(Color.WHITE);
         gameOverLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
         gameOverLabel.setPrefSize(WIDTH, HEIGHT);
-        gameOverLabel.setLayoutY(HEIGHT/3);
+        gameOverLabel.setLayoutY(HEIGHT / 3);
         //text align center
         gameOverLabel.setAlignment(Pos.CENTER);
 
         //create the button
         Button restartButton = new Button("Restart");
-        restartButton.setPrefSize(WIDTH, HEIGHT/10);
-        restartButton.setLayoutY(HEIGHT/2 - 10);
+        restartButton.setPrefSize(WIDTH, HEIGHT / 10);
+        restartButton.setLayoutY(HEIGHT / 2 - 10);
         restartButton.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         restartButton.setTextFill(Color.WHITE);
         restartButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
@@ -581,8 +598,8 @@ public class Main extends Application {
 
         // add options button
         Button optionsButton = new Button("Options");
-        optionsButton.setPrefSize(WIDTH, HEIGHT/10);
-        optionsButton.setLayoutY(HEIGHT/2 + HEIGHT/10);
+        optionsButton.setPrefSize(WIDTH, HEIGHT / 10);
+        optionsButton.setLayoutY(HEIGHT / 2 + HEIGHT / 10);
         optionsButton.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         optionsButton.setTextFill(Color.WHITE);
         optionsButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
@@ -593,8 +610,8 @@ public class Main extends Application {
 
         // add Main menu button
         Button mainMenu = new Button("Main Menu");
-        mainMenu.setPrefSize(WIDTH, HEIGHT/10);
-        mainMenu.setLayoutY(HEIGHT/2 + HEIGHT/10  +HEIGHT/10  + 10);
+        mainMenu.setPrefSize(WIDTH, HEIGHT / 10);
+        mainMenu.setLayoutY(HEIGHT / 2 + HEIGHT / 10 + HEIGHT / 10 + 10);
         mainMenu.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         mainMenu.setTextFill(Color.WHITE);
         mainMenu.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
@@ -624,7 +641,7 @@ public class Main extends Application {
 
             playingField = createPlayingField(amountOfXYBoxes, amountOfXYBoxes);
 
-        }else if (playingField.length != amountOfXYBoxes) {
+        } else if (playingField.length != amountOfXYBoxes) {
             playingField = createPlayingField(amountOfXYBoxes, amountOfXYBoxes);
         }
 
@@ -691,15 +708,20 @@ public class Main extends Application {
             StreamResult result = new StreamResult(file);
             transformer.transform(source, result);
 
-            createNotification( "The options have been saved", s);
+            //createNotification("The options have been saved", s);
+            //success message alert
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Options");
+            alert.setHeaderText("Options Successfully Saved");
+            alert.setContentText("You can close this window now");
+            alert.showAndWait();
 
         } catch (ParserConfigurationException | TransformerException e) {
             e.printStackTrace();
         }
     }
 
-    public static void loadOptions() throws ParserConfigurationException {
-        String path = "options.xml";
+    public static void loadOptions(String path) throws ParserConfigurationException {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 
@@ -717,13 +739,14 @@ public class Main extends Application {
             Element foodColor = (Element) root.getElementsByTagName("foodColor").item(0);
 
 
-
             //get the values
             SNAKE_SPEED = Integer.parseInt(snakeSpeed.getAttribute("value"));
             SNAKE_SIZE = Integer.parseInt(snakeSize.getAttribute("value"));
             pointMultiplier = Integer.parseInt(pointMultiplier2.getAttribute("value"));
             amountOfFood = Integer.parseInt(foodAmount.getAttribute("value"));
             SNAKE_GROW = Integer.parseInt(snakeGrow.getAttribute("value"));
+            SNAKE_COLOR = Color.valueOf(snakeColor.getAttribute("value"));
+            FOOD_COLOR = Color.valueOf(foodColor.getAttribute("value"));
 
             //get the map
             Element map = (Element) root.getElementsByTagName("map").item(0);
@@ -732,7 +755,7 @@ public class Main extends Application {
 
             if (rows.getLength() != amountOfXYBoxes) {
                 playingField2 = createPlayingField(amountOfXYBoxes, amountOfXYBoxes);
-            }else{
+            } else {
                 for (int i = 0; i < rows.getLength(); i++) {
                     Element row = (Element) rows.item(i);
                     NodeList cells = row.getElementsByTagName("cell");
@@ -758,11 +781,11 @@ public class Main extends Application {
         //set the background of the scene
         gameScene.setFill(Color.BLACK);
 
-        double blockSizeH =  (blockSize/1.5);
+        double blockSizeH = (blockSize / 1.5);
 
         //center the grid
         gridPanel.setLayoutY(0);
-        gridPanel.setLayoutX((WIDTH - (playingField.length * blockSizeH))/2);
+        gridPanel.setLayoutX((WIDTH - (playingField.length * blockSizeH)) / 2);
 
         //create one button field in playingField
         for (int i = 0; i < playingField.length; i++) {
@@ -770,7 +793,7 @@ public class Main extends Application {
                 Button button = new Button();
                 button.setPrefSize(blockSizeH, blockSizeH);
 
-                if(playingField[j][i] == 1) {
+                if (playingField[j][i] == 1) {
                     button.setStyle("-fx-background-color: #135ce5");
                 }
 
@@ -796,10 +819,10 @@ public class Main extends Application {
 
         //create the save button
         Button saveButton = new Button("Save");
-        saveButton.setPrefSize(WIDTH, blockSize);
+        saveButton.setPrefSize(WIDTH, buildBlockSize);
 
         //position the save button
-        saveButton.setLayoutY(HEIGHT/2 + blockSize * 4 );
+        saveButton.setLayoutY(HEIGHT / 2 + buildBlockSize * 2);
         saveButton.setLayoutX(0);
 
         saveButton.setStyle("-fx-background-color: GREEN");
@@ -815,10 +838,10 @@ public class Main extends Application {
 
         //create the back button
         Button backButton = new Button("Back");
-        backButton.setPrefSize(WIDTH, blockSize);
+        backButton.setPrefSize(WIDTH, buildBlockSize);
 
         //position the buttons
-        backButton.setLayoutY(HEIGHT/2 + blockSize * 5 + 10);
+        backButton.setLayoutY(HEIGHT / 2 + buildBlockSize * 3);
         backButton.setLayoutX(0);
 
         //change button color
@@ -836,10 +859,10 @@ public class Main extends Application {
 
         //create the reset button
         Button resetButton = new Button("Reset");
-        resetButton.setPrefSize(WIDTH, blockSize);
+        resetButton.setPrefSize(WIDTH, buildBlockSize);
 
         //position the buttons
-        resetButton.setLayoutY(HEIGHT/2 + blockSize * 6 + 20);
+        resetButton.setLayoutY(HEIGHT / 2 + buildBlockSize * 4);
         resetButton.setLayoutX(0);
 
         //change button color
@@ -862,7 +885,7 @@ public class Main extends Application {
             }
         });
 
-        ((Group) gameScene.getRoot()).getChildren().addAll(resetButton,gridPanel, saveButton, backButton);
+        ((Group) gameScene.getRoot()).getChildren().addAll(resetButton, gridPanel, saveButton, backButton);
         return gameScene;
     }
 
@@ -878,21 +901,20 @@ public class Main extends Application {
         vBox.getChildren().add(label);
         vBox.setAlignment(Pos.CENTER);
         //set green background
-        vBox.setStyle("-fx-background-color: Black");;
+        vBox.setStyle("-fx-background-color: Black");
 
         //button to close the stage
         Button closeButton = new Button("Close");
-        closeButton.setPrefSize(WIDTH, blockSize);
+        closeButton.setPrefSize(WIDTH, buildBlockSize);
 
         //position the button
-        closeButton.setLayoutY(HEIGHT/2 + blockSize * 6 + 20);
+        closeButton.setLayoutY(HEIGHT / 2 + buildBlockSize * 6 + 20);
         closeButton.setLayoutX(0);
 
         //change button color
         closeButton.setStyle("-fx-background-color: GREEN");
         closeButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
         closeButton.setTextFill(Color.WHITE);
-
 
 
         //create a scene to hold the vbox

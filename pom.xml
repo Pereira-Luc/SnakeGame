@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cz.cuni.mff.java</groupId>
-    <artifactId>hw.fxwords</artifactId>
+    <artifactId>hw.Snake</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -14,6 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <javafx.version>18.0.1</javafx.version>
+        <exec.mainClass>cz.cuni.mff.java.hw.snake.Main</exec.mainClass>
     </properties>
 
     <build>
@@ -28,7 +29,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.6</version>
                 <configuration>
-                    <mainClass>cz.cuni.mff.java.hw.fxwords/cz.cuni.mff.java.hw.snake.Main</mainClass>
+                    <mainClass>cz.cuni.mff.java.hw.snake.Main</mainClass>
                 </configuration>
             </plugin>
         </plugins>
