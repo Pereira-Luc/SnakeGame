@@ -29,13 +29,13 @@ If the value is 1, the cell is a wall.
         <b>Row (row)</b>
      </td>
     <td>
-        <b>Cell (Cell)</b>
+        <b>Cell (cell)</b>
      </td>
     <td>
-        <b>Cell (Cell)</b>
+        <b>Cell (cell)</b>
      </td>
     <td>
-        <b>Cell (Cell)</b>
+        <b>Cell (cell)</b>
      </td>
     <td>
         <b>Row (/row)</b>
@@ -46,13 +46,13 @@ If the value is 1, the cell is a wall.
         <b>Row (row)</b>
      </td>
     <td>
-        <b>Cell (Cell)</b>
+        <b>Cell (cell)</b>
      </td>
     <td>
-        <b>Cell (Cell)</b>
+        <b>Cell (cell)</b>
      </td>
     <td>
-        <b>Cell (Cell)</b>
+        <b>Cell (cell)</b>
      </td>
     <td>
         <b>Row (/row)</b>
