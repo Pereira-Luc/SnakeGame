@@ -1,4 +1,4 @@
-module cz.cuni.mff.java.hw.fxwords {
+module cz.cuni.mff.java.hw.snake {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.xml;

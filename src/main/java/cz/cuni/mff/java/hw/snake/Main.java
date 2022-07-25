@@ -72,6 +72,9 @@ public class Main extends Application {
     static int score = 0;
 
     static int[][] playingField;
+    public static void main(String[] args) {
+        launch(args);
+    }
 
     @Override
     public void start(Stage stage) throws ParserConfigurationException {

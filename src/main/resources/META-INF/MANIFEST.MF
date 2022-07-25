@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Main-Class: cz.cuni.mff.java.hw.snake.Launcher
+Class-Path: javafx-fxml-18.0.1.jar javafx-fxml-18.0.1-win.jar javafx-con
+ trols-18.0.1-win.jar javafx-controls-18.0.1.jar javafx-base-18.0.1.jar 
+ javafx-fxml-18.0.1.jar javafx-fxml-18.0.1-win.jar javafx-controls-18.0.
+ 1.jar javafx-controls-18.0.1-win.jar javafx-graphics-18.0.1.jar javafx-
+ graphics-18.0.1-win.jar javafx-base-18.0.1.jar javafx-base-18.0.1-win.j
+ ar javafx-graphics-18.0.1-win.jar javafx-graphics-18.0.1.jar jdom2-2.0.
+ 6.jar javafx-base-18.0.1-win.jar
+
