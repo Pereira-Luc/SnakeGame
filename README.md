@@ -10,5 +10,7 @@ a map editor and some pre-defined maps.
 
 <h3>Release Links</h3>
 
-    [Download v1.0.0]( https://github.com/Pereira-Luc/SnakeGame/releases/tag/v1.0.0 )
+[Download Snake v1.0.0]( https://github.com/Pereira-Luc/SnakeGame/releases/tag/v1.0.0 )
+<br>
+[Download Maps]( https://github.com/Pereira-Luc/SnakeGame/releases/tag/Maps )
 
