@@ -390,7 +390,7 @@ public class Main extends Application {
         saveButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                saveOptions(primaryStage);
+                saveOptions(null);
             }
         });
 
@@ -462,6 +462,7 @@ public class Main extends Application {
         Button optionsButton = new Button("Options");
         Button mapEditorButton = new Button("Map Editor");
         Button loadMapButton = new Button("Load Map");
+        Button exportMapButton = new Button("Export Map");
         Button exitButton = new Button("Exit");
 
         Label title = new Label("Snake Game");
@@ -488,27 +489,36 @@ public class Main extends Application {
         exitButton.setPrefSize(WIDTH, buildBlockSize);
         mapEditorButton.setPrefSize(WIDTH, buildBlockSize);
         loadMapButton.setPrefSize(WIDTH, buildBlockSize);
+        exportMapButton.setPrefSize(WIDTH, buildBlockSize);
+
+        Background b = new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY));
 
         //set the button background color
-        startButton.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        optionsButton.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        exitButton.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        mapEditorButton.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        loadMapButton.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+        startButton.setBackground(b);
+        optionsButton.setBackground(b);
+        exitButton.setBackground(b);
+        mapEditorButton.setBackground(b);
+        loadMapButton.setBackground(b);
+        exportMapButton.setBackground(b);
+
 
         //set the button text color
-        startButton.setTextFill(Color.WHITE);
-        optionsButton.setTextFill(Color.WHITE);
-        exitButton.setTextFill(Color.WHITE);
-        mapEditorButton.setTextFill(Color.WHITE);
-        loadMapButton.setTextFill(Color.WHITE);
+        Color textColor = Color.WHITE;
+        startButton.setTextFill(textColor);
+        optionsButton.setTextFill(textColor);
+        exitButton.setTextFill(textColor);
+        mapEditorButton.setTextFill(textColor);
+        loadMapButton.setTextFill(textColor);
+        exportMapButton.setTextFill(textColor);
 
         //set the button font size
-        startButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
-        optionsButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
-        exitButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
-        mapEditorButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
-        loadMapButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        Font defaultFont = Font.font("Verdana", FontWeight.BOLD, FontPosture.REGULAR, 20);
+        startButton.setFont(defaultFont);
+        optionsButton.setFont(defaultFont);
+        exitButton.setFont(defaultFont);
+        mapEditorButton.setFont(defaultFont);
+        loadMapButton.setFont(defaultFont);
+        exportMapButton.setFont(defaultFont);
 
         //set the button text
         startButton.setText("Start");
@@ -516,6 +526,7 @@ public class Main extends Application {
         exitButton.setText("Exit");
         mapEditorButton.setText("Map Editor");
         loadMapButton.setText("Load Map");
+        exportMapButton.setText("Export Map");
 
         //position the buttons in the scene
         startButton.setLayoutX(0);
@@ -526,8 +537,10 @@ public class Main extends Application {
         mapEditorButton.setLayoutY(WIDTH / 2 + 20);
         loadMapButton.setLayoutX(0);
         loadMapButton.setLayoutY(WIDTH / 2 + buildBlockSize + 30);
+        exportMapButton.setLayoutX(0);
+        exportMapButton.setLayoutY(WIDTH / 2 + buildBlockSize * 2 + 40);
         exitButton.setLayoutX(0);
-        exitButton.setLayoutY(WIDTH / 2 + buildBlockSize * 2 + 40);
+        exitButton.setLayoutY(WIDTH / 2 + buildBlockSize * 3 + 50);
 
 
         //set the button onAction
@@ -539,6 +552,21 @@ public class Main extends Application {
         });
         mapEditorButton.setOnAction(e -> {
             changeScene(getMapEditorScene(primaryStage), primaryStage);
+        });
+
+        exportMapButton.setOnAction(e -> {
+            //saves the settings to a file
+            //file explorer to chose the folder to save the file to
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Map");
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+
+            //get path of the folder to save the file to
+            File file = fileChooser.showSaveDialog(primaryStage);
+
+            saveOptions(file.getPath());
+
+
         });
 
         loadMapButton.setOnAction(e -> {
@@ -571,7 +599,7 @@ public class Main extends Application {
             primaryStage.close();
         });
         //add the buttons to the scene
-        ((Group) scene.getRoot()).getChildren().addAll(title, startButton, optionsButton, mapEditorButton, exitButton, loadMapButton);
+        ((Group) scene.getRoot()).getChildren().addAll(title, startButton, optionsButton, mapEditorButton, exitButton, loadMapButton, exportMapButton);
         return scene;
     }
 
@@ -646,7 +674,9 @@ public class Main extends Application {
 
      **/
 
-    public static void saveOptions(Stage s) {
+    public static void saveOptions(String Path) {
+
+
         //check if playingField is null
         if (playingField == null) {
 
@@ -657,7 +687,10 @@ public class Main extends Application {
         }
 
         //create the file
-        File file = new File("options.xml");
+        if(Path == null) {
+            Path = "options";
+        }
+        File file = new File(Path+".xml");
         try {
             //create the document
             DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
@@ -848,7 +881,7 @@ public class Main extends Application {
         saveButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                saveOptions(primaryStage);
+                saveOptions(null);
             }
         });
 
@@ -903,53 +936,6 @@ public class Main extends Application {
 
         ((Group) gameScene.getRoot()).getChildren().addAll(resetButton, gridPanel, saveButton, backButton);
         return gameScene;
-    }
-
-    //This function is used to create notification that can be called in any stage and display a specific message
-    public static void createNotification(String message, Stage primaryStage) {
-        //create a LABLE to display the message
-        Label label = new Label(message);
-        label.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
-        label.setTextFill(Color.WHITE);
-
-        //create a VBOX to hold the label
-        VBox vBox = new VBox();
-        vBox.getChildren().add(label);
-        vBox.setAlignment(Pos.CENTER);
-        //set green background
-        vBox.setStyle("-fx-background-color: Black");
-
-        //button to close the stage
-        Button closeButton = new Button("Close");
-        closeButton.setPrefSize(WIDTH, buildBlockSize);
-
-        //position the button
-        closeButton.setLayoutY(HEIGHT / 2 + buildBlockSize * 6 + 20);
-        closeButton.setLayoutX(0);
-
-        //change button color
-        closeButton.setStyle("-fx-background-color: GREEN");
-        closeButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
-        closeButton.setTextFill(Color.WHITE);
-
-
-        //create a scene to hold the vbox
-        Scene notificationScene = new Scene(vBox, WIDTH, HEIGHT);
-        vBox.getChildren().add(closeButton);
-
-        //create a stage to hold the scene
-        Stage notificationStage = new Stage();
-        notificationStage.setScene(notificationScene);
-        notificationStage.setTitle("Notification");
-        notificationStage.initModality(Modality.APPLICATION_MODAL);
-        notificationStage.show();
-
-        closeButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                notificationStage.close();
-            }
-        });
     }
 }
 
