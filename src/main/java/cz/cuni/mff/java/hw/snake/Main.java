@@ -63,6 +63,8 @@ public class Main extends Application {
     private static int pointMultiplier = 100;
     private static final Background defaultBackground = new Background(new BackgroundFill(javafx.scene.paint.Color.BLACK, null, null));
 
+    private static Boolean firstStartUp = true;
+
     //direction
     private static final int UP = 0;
     private static final int RIGHT = 1;
@@ -758,6 +760,7 @@ public class Main extends Application {
 
             //createNotification("The options have been saved", s);
             //success message alert
+            if(firstStartUp) {firstStartUp = false; return;}
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Options");
             alert.setHeaderText("Options Successfully Saved");
