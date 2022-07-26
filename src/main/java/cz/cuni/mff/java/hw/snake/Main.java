@@ -53,7 +53,7 @@ public class Main extends Application {
     private static Color SNAKE_COLOR = Color.BLUE;
     private static Color FOOD_COLOR = Color.RED;
 
-    private static int amountOfFood = 3;
+    private static int amountOfFood = 1;
 
     private static final int amountOfXYBoxes = 30;
     private static final int blockSize = WIDTH / amountOfXYBoxes;
