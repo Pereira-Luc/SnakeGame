@@ -13,7 +13,7 @@ a map editor and some pre-defined maps.
 * The map can be saved by clicking the "Save Map" button.
 
      
-         This Will open a Window where you can save the map.
+         This will open a Window where you can save the map.
 
 * The map can be loaded by clicking the "Load Map" button.
 * Map files also include all the other settings.
