@@ -564,9 +564,10 @@ public class Main extends Application {
             //get path of the folder to save the file to
             File file = fileChooser.showSaveDialog(primaryStage);
 
-            saveOptions(file.getPath());
-
-
+            if(file != null) {
+                //save the map to the file
+                saveOptions(file.getPath());
+            }
         });
 
         loadMapButton.setOnAction(e -> {
@@ -685,6 +686,9 @@ public class Main extends Application {
         } else if (playingField.length != amountOfXYBoxes) {
             playingField = createPlayingField(amountOfXYBoxes, amountOfXYBoxes);
         }
+
+        String currentPath = System.getProperty("user.dir");
+        System.out.println(currentPath);
 
         //create the file
         if(Path == null) {
@@ -820,6 +824,8 @@ public class Main extends Application {
         } catch (IOException | SAXException e) {
             e.printStackTrace();
         }
+
+        saveOptions(null);
     }
 
     //scene for the MapEditor
