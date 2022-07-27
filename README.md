@@ -4,7 +4,7 @@
 a map editor and some pre-defined maps.
 #
 
-* The game was tested on a Windows 11 using the Java Version 17-18. The Jar file is included in the repository
+* The game was tested on a Windows 11 and Arch Linux using the Java Version 17-18. The Jar file is included in the repository
 
 * The Jar file can be run without any additional libraries.
 #
